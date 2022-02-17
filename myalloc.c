@@ -4,7 +4,7 @@
 
 struct block *head = NULL;
 
-int myalloc(int size) {
+void *myalloc(int size) {
     if (head == NULL) {
         head = sbrk(1024);
         head->next = NULL;

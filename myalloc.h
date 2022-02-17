@@ -16,4 +16,4 @@ struct block {
     int in_use;   // Boolean
 };
 
-int myalloc(int size);
+void *myalloc(int size);
