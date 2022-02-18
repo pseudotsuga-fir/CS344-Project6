@@ -10,6 +10,8 @@
 
 #define PTR_OFFSET(p, offset) ((void*)((char *)(p) + (offset)))
 
+#define REQ_SPACE(space) (PADDED_SIZE(space) + 32)
+
 struct block {
     struct block *next;
     int size;     // Bytes
@@ -17,3 +19,5 @@ struct block {
 };
 
 void *myalloc(int size);
+
+void myfree(void *p);

@@ -5,6 +5,7 @@
 struct block *head = NULL;
 
 void *myalloc(int size) {
+    
     if (head == NULL) {
         head = sbrk(1024);
         head->next = NULL;
@@ -12,17 +13,35 @@ void *myalloc(int size) {
         head->in_use = 0;
     }
 
+    int bytes = PADDED_SIZE(size);
+
+    struct block *n = head;
+    
     do {
-        if(!head->in_use) {
-            if(size <= head->size) {
-                head->in_use = 1;
-                return PTR_OFFSET(head, PADDED_SIZE(sizeof(struct block)));
+        if(!n->in_use) {
+            if (bytes <= n->size) {
+                int required_space = REQ_SPACE(size);
+                if (n->size >= required_space) {
+                    struct block *new = PTR_OFFSET(n, PADDED_SIZE(sizeof(struct block)));
+                    new->next = NULL;
+                    new->size = n->size - (PADDED_SIZE(size) + PADDED_SIZE(sizeof(struct block)));
+                    new->in_use = 0;
+                    n->size = bytes;
+                    n->next = new;
+                }
+                n->in_use = 1;
+                return PTR_OFFSET(n, PADDED_SIZE(sizeof(struct block)));
             }
         }
-        head = head->next;
-    } while (head);
+        n = n->next;
+    } while (n);
 
     return NULL;
+}
+
+void myfree(void *p) {
+    struct block *b = p-16;
+    b->in_use = 0;
 }
 
 void print_data(void)
@@ -50,11 +69,11 @@ void print_data(void)
 
 int main() {
     void *p;
-    print_data();
-    p = myalloc(1009);
-    print_data();
-    p = myalloc(0);
-    print_data();
-    p = myalloc(1);
-    print_data();
+
+    myalloc(10);     print_data();
+    p = myalloc(20); print_data();
+    myalloc(30);     print_data();
+    myfree(p);       print_data();
+    myalloc(40);     print_data();
+    myalloc(10);     print_data();
 }
