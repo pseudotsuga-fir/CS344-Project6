@@ -9,6 +9,7 @@ void *myalloc(int size) {
     if (head == NULL) {
         head = sbrk(1024);
         head->next = NULL;
+        head->prev = NULL;
         head->size = 1024 - PADDED_SIZE(sizeof(struct block));
         head->in_use = 0;
     }
@@ -23,7 +24,8 @@ void *myalloc(int size) {
                 int required_space = REQ_SPACE(size);
                 if (n->size >= required_space) {
                     struct block *new = PTR_OFFSET(n, PADDED_SIZE(sizeof(struct block)));
-                    new->next = NULL;
+                    new->next = n->next;
+                    new->prev = n;
                     new->size = n->size - (PADDED_SIZE(size) + PADDED_SIZE(sizeof(struct block)));
                     new->in_use = 0;
                     n->size = bytes;
@@ -39,9 +41,19 @@ void *myalloc(int size) {
     return NULL;
 }
 
+void mergeblock(struct block *cur) {
+    if ((cur) && (cur->in_use == 0) && (cur->next) && ((cur->next)->in_use == 0)) {
+        cur->size = cur->size + PADDED_SIZE(sizeof(struct block)) + (cur->next)->size;
+        cur->next = (cur->next)->next;
+    }
+}
+
 void myfree(void *p) {
-    struct block *b = p-16;
+    struct block *b = PTR_OFFSET(p, -PADDED_SIZE(sizeof(struct block)));
+    // printf(" %p\n", b);
     b->in_use = 0;
+    mergeblock(b);
+    mergeblock(b->prev);
 }
 
 void print_data(void)
@@ -68,12 +80,15 @@ void print_data(void)
 }
 
 int main() {
-    void *p;
+    void *p, *q, *r, *s;
 
-    myalloc(10);     print_data();
-    p = myalloc(20); print_data();
-    myalloc(30);     print_data();
-    myfree(p);       print_data();
-    myalloc(40);     print_data();
-    myalloc(10);     print_data();
+    p = myalloc(10); print_data();
+    q = myalloc(20); print_data();
+    r = myalloc(30); print_data();
+    s = myalloc(40); print_data();
+
+    myfree(q); print_data();
+    myfree(p); print_data();
+    myfree(s); print_data();
+    myfree(r); print_data();
 }

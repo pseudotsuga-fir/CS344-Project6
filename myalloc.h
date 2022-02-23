@@ -14,6 +14,7 @@
 
 struct block {
     struct block *next;
+    struct block *prev;
     int size;     // Bytes
     int in_use;   // Boolean
 };
