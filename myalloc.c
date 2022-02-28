@@ -23,7 +23,7 @@ void *myalloc(int size) {
             if (bytes <= n->size) {
                 int required_space = REQ_SPACE(size);
                 if (n->size >= required_space) {
-                    struct block *new = PTR_OFFSET(n, PADDED_SIZE(sizeof(struct block)));
+                    struct block *new = PTR_OFFSET(n, PADDED_SIZE(sizeof(struct block)) + PADDED_SIZE(size));
                     new->next = n->next;
                     new->prev = n;
                     new->size = n->size - (PADDED_SIZE(size) + PADDED_SIZE(sizeof(struct block)));

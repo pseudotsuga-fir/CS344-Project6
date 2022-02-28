@@ -4,7 +4,7 @@
 #include <unistd.h>
 
 #define ALIGNMENT 16   // Must be power of 2
-#define GET_PAD(x) ((ALIGNMENT - 1) - ((x) - 1) & (ALIGNMENT - 1))
+#define GET_PAD(x) ((ALIGNMENT - 1) - (((x) - 1) & (ALIGNMENT - 1)))
 
 #define PADDED_SIZE(x) ((x) + GET_PAD(x))
 
